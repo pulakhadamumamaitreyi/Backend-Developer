@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Register</h2>
+<input id="name" placeholder="Name">
+<input id="email" placeholder="Email">
+<input id="password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="lemail" placeholder="Email">
+<input id="lpassword" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<h2>Tasks</h2>
+<input id="task">
+<button onclick="addTask()">Add Task</button>
+
+<ul id="list"></ul>
+
+<script>
+let token = "";
+
+async function register() {
+    await fetch("http://localhost:3000/api/v1/auth/register", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            name: name.value,
+            email: email.value,
+            password: password.value
+        })
+    });
+}
+
+async function login() {
+    const res = await fetch("http://localhost:3000/api/v1/auth/login", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            email: lemail.value,
+            password: lpassword.value
+        })
+    });
+
+    const data = await res.json();
+    token = data.token;
+}
+
+async function addTask() {
+    await fetch("http://localhost:3000/api/v1/tasks", {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json",
+            "Authorization": token
+        },
+        body: JSON.stringify({ title: task.value })
+    });
+
+    loadTasks();
+}
+
+async function loadTasks() {
+    const res = await fetch("http://localhost:3000/api/v1/tasks", {
+        headers: { "Authorization": token }
+    });
+
+    const data = await res.json();
+    list.innerHTML = data.map(t => `<li>${t.title}</li>`).join("");
+}
+</script>
+
+</body>
+</html>
